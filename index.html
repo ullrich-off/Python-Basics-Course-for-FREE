@@ -1,0 +1,733 @@
+<meta charset="utf-8">
+<title>Ten Minute Python</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="fonts/fonts.css">
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<style>
+/* Layout concept: a calm home with one big "continue" card, a three-part 10-minute plan and a course grid; lessons are a split screen with the explanation on the left and a live editor + console on the right. */
+:root{
+  --bg:#f3f6fc; --surface:#ffffff; --surface2:#e9eef9; --ink:#16213a; --muted:#4f5b77; --line:#d6ddee;
+  --blue:#2a58cf; --blue-ink:#ffffff; --blue-soft:#e2e9fd;
+  --yellow:#ffc933; --yellow-ink:#3a2a00; --yellow-soft:#fff2c9; --flame:#c25a00;
+  --green:#12804e; --green-soft:#d9f4e6; --red:#c9382a; --red-soft:#fde3df;
+  --code-bg:#111a2e; --code-fg:#e6ebf7; --code-dim:#7c89a8; --code-line:#1d2945;
+  --t-k:#ffb26b; --t-b:#7cc6ff; --t-s:#8fe39a; --t-n:#f6d56a; --t-c:#7c89a8; --t-f:#c8aaff;
+  --f-disp:'Fredoka','Nunito',system-ui,sans-serif; --f-body:'Nunito','Segoe UI',system-ui,sans-serif; --f-mono:'Fira Code',Consolas,'Courier New',monospace;
+  --c1:#2a58cf; --c2:#b3500a; --c3:#12804e; --c4:#c2377f; --c5:#0f7c8a; --c6:#7a4bd6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1325; --surface:#141d35; --surface2:#1c2845; --ink:#e7ecf8; --muted:#a2aecb; --line:#2a3858;
+    --blue:#7ba0ff; --blue-ink:#0a1230; --blue-soft:#1c2c58;
+    --yellow:#ffd04a; --yellow-ink:#3a2a00; --yellow-soft:#3a3010; --flame:#ff9a3d;
+    --green:#4bd68f; --green-soft:#12362a; --red:#ff8a7a; --red-soft:#3d1c1a;
+    --c1:#7ba0ff; --c2:#ff9b52; --c3:#4bd68f; --c4:#ff7fba; --c5:#4fd0de; --c6:#b394ff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1325; --surface:#141d35; --surface2:#1c2845; --ink:#e7ecf8; --muted:#a2aecb; --line:#2a3858;
+  --blue:#7ba0ff; --blue-ink:#0a1230; --blue-soft:#1c2c58;
+  --yellow:#ffd04a; --yellow-ink:#3a2a00; --yellow-soft:#3a3010; --flame:#ff9a3d;
+  --green:#4bd68f; --green-soft:#12362a; --red:#ff8a7a; --red-soft:#3d1c1a;
+  --c1:#7ba0ff; --c2:#ff9b52; --c3:#4bd68f; --c4:#ff7fba; --c5:#4fd0de; --c6:#b394ff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:0 60px}
+h1,h2,h3,h4{font-family:var(--f-disp); font-weight:600; line-height:1.18; margin:0; text-wrap:balance}
+p{margin:0 0 .85em}
+code,.mono{font-family:var(--f-mono); font-size:.88em; font-variant-ligatures:none}
+:not(pre)>code{background:var(--surface2); border-radius:6px; padding:1px 6px}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+a{color:var(--blue)}
+.wrap{max-width:1180px; margin:0 auto}
+
+/* header */
+.hd{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); border-bottom:1px solid var(--line); margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+  padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); background:var(--bg); z-index:21}
+.hd .wrap{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.logo{display:flex; align-items:center; gap:8px; font-family:var(--f-disp); font-weight:700; font-size:21px; text-decoration:none; color:var(--ink); background:none; border:0; padding:0}
+.logo svg{flex:none}
+.nav{display:flex; gap:2px; flex:1; min-width:0; overflow-x:auto}
+.nav button{background:none; border:0; border-radius:10px; padding:7px 13px; font-weight:700; color:var(--muted); white-space:nowrap}
+.nav button:hover{background:var(--surface2)}
+.nav button[aria-current="page"]{background:var(--blue-soft); color:var(--blue)}
+.stats{display:flex; gap:8px; align-items:center}
+.pillstat{display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:99px; padding:4px 12px; font-weight:800; font-size:15px; white-space:nowrap}
+.pillstat.hot{color:var(--flame)}
+.pillstat.cold{color:var(--muted)}
+.pillstat small{font-weight:600; color:var(--muted); font-size:13px}
+.iconbtn{border:1px solid var(--line); background:var(--surface); border-radius:99px; padding:4px 12px; font-size:14px; font-weight:700}
+
+/* generic */
+.view{padding-top:26px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2px solid var(--blue); background:var(--blue); color:var(--blue-ink); border-radius:12px; padding:9px 20px; font-weight:800; font-size:16px; text-decoration:none; transition:transform .08s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(1px)}
+.btn.sec{background:transparent; color:var(--blue)}
+.btn.good{background:var(--green); border-color:var(--green); color:#fff}
+.btn.sm{padding:5px 14px; font-size:14.5px; border-radius:10px}
+.btn:disabled{opacity:.45; cursor:default; transform:none}
+.btn.yel{background:var(--yellow); border-color:var(--yellow); color:var(--yellow-ink)}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:22px}
+.eyebrow{font-family:var(--f-disp); font-size:14px; letter-spacing:.07em; text-transform:uppercase; color:var(--blue); font-weight:600; margin-bottom:6px}
+.muted{color:var(--muted)}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.bar{height:10px; background:var(--surface2); border-radius:99px; overflow:hidden}
+.bar i{display:block; height:100%; background:var(--green); border-radius:99px; transition:width .4s}
+.bar.xp i{background:var(--yellow)}
+
+/* home */
+.home{display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:26px; align-items:start}
+.hero h1{font-size:clamp(30px,5vw,46px); letter-spacing:-.01em}
+.hero p{font-size:19px; color:var(--muted); max-width:46ch; margin-top:8px}
+.cont{display:grid; grid-template-columns:auto 1fr auto; gap:18px; align-items:center; background:var(--blue); color:var(--blue-ink); border-radius:20px; padding:20px 24px; margin:22px 0}
+.cont .t small{display:block; opacity:.85; font-weight:700}
+.cont .t b{font-family:var(--f-disp); font-size:24px; font-weight:600; line-height:1.2}
+.cont .btn{background:var(--yellow); border-color:var(--yellow); color:var(--yellow-ink)}
+.plan{display:grid; gap:10px; margin:12px 0 28px}
+.plan .it{display:grid; grid-template-columns:34px 1fr auto; gap:14px; align-items:center; padding:14px 16px; border:1px solid var(--line); border-radius:14px; background:var(--surface)}
+.plan .it .n{width:34px; height:34px; border-radius:50%; background:var(--surface2); display:grid; place-items:center; font-weight:800}
+.plan .it.ok .n{background:var(--green); color:#fff}
+.plan .it b{display:block; font-size:17px}
+.plan .it small{color:var(--muted); font-size:14.5px}
+.sect{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:8px 0 10px}
+.sect h2{font-size:26px}
+.courses{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px}
+.course{display:flex; flex-direction:column; gap:10px; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; cursor:pointer; min-width:0}
+.course:hover{border-color:var(--cc,var(--blue)); box-shadow:0 6px 18px rgba(20,30,60,.08)}
+.glyph{width:54px; height:54px; border-radius:14px; display:grid; place-items:center; font-family:var(--f-mono); font-weight:500; font-size:17px; color:#fff; background:var(--cc,var(--blue)); flex:none}
+:root[data-theme="dark"] .glyph{color:#0c1325}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .glyph{color:#0c1325}}
+.course h3{font-size:20px}
+.course p{font-size:15.5px; color:var(--muted); margin:0}
+.course .meta{display:flex; justify-content:space-between; font-size:14px; color:var(--muted); font-weight:700}
+.tag{display:inline-block; background:var(--yellow-soft); color:var(--ink); font-weight:800; font-size:12.5px; border-radius:99px; padding:1px 10px; align-self:flex-start}
+.tag.done{background:var(--green-soft); color:var(--green)}
+.side{display:grid; gap:16px; position:sticky; top:84px}
+.side h3{font-size:18px; margin-bottom:8px}
+.streakbox{text-align:center}
+.streakbox .big{font-family:var(--f-disp); font-weight:700; font-size:54px; line-height:1; color:var(--flame)}
+.streakbox.cold .big{color:var(--muted)}
+.week{display:flex; justify-content:space-between; margin-top:12px}
+.week span{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12.5px; font-weight:800; color:var(--muted)}
+.week i{width:26px; height:26px; border-radius:50%; background:var(--surface2); display:grid; place-items:center}
+.week i.on{background:var(--flame); color:#fff}
+.week i.today{outline:2px solid var(--blue); outline-offset:2px}
+.ringbox{display:flex; align-items:center; gap:16px}
+.ringwrap{position:relative; flex:none}
+.ringwrap b{position:absolute; inset:0; display:grid; place-items:center; font-family:var(--f-disp); font-size:19px}
+.welcome{margin:18px 0; border:2px dashed var(--blue); background:var(--blue-soft)}
+.welcome input,.welcome select,.field input,.field select,.field textarea{font:inherit; background:var(--surface); color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:8px 12px; max-width:100%}
+.field{display:flex; flex-direction:column; gap:4px; min-width:0}
+.field label{font-weight:800; font-size:15px}
+
+/* course page */
+.crumb{background:none; border:0; color:var(--blue); font-weight:800; padding:0; margin-bottom:10px}
+.chead{display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:22px}
+.chead h1{font-size:clamp(28px,4.5vw,40px)}
+.lessons{display:grid; gap:10px; max-width:820px}
+.lrow{display:grid; grid-template-columns:42px 1fr auto; gap:14px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px; text-align:left; width:100%}
+.lrow:hover{border-color:var(--blue)}
+.lrow .n{width:42px; height:42px; border-radius:50%; background:var(--surface2); display:grid; place-items:center; font-weight:800}
+.lrow.done .n{background:var(--green); color:#fff}
+.lrow b{display:block}
+.lrow small{color:var(--muted)}
+
+/* player */
+.player{display:flex; flex-direction:column; gap:14px}
+.ptop{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.back{background:none; border:1px solid var(--line); border-radius:10px; padding:5px 12px; font-weight:800; background:var(--surface)}
+.ptitle small{display:block; color:var(--muted); font-weight:700; font-size:13.5px}
+.ptitle b{font-family:var(--f-disp); font-size:20px; font-weight:600}
+.segs{display:flex; gap:5px; flex:1; min-width:140px; max-width:420px}
+.segs i{flex:1; height:9px; border-radius:99px; background:var(--surface2)}
+.segs i.done{background:var(--green)}
+.segs i.cur{background:var(--blue)}
+.pbody{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr); gap:18px; align-items:start}
+.pbody.single{grid-template-columns:minmax(0,760px); justify-content:center}
+.pane{min-width:0}
+.txt{padding:24px clamp(16px,2.4vw,28px)}
+.txt h2{font-size:28px; margin-bottom:12px}
+.prose p,.prose li{font-size:17.5px}
+.prose ul,.prose ol{padding-left:22px; margin:0 0 .9em}
+.prose li{margin-bottom:4px}
+.tip,.words,.try{border-radius:14px; padding:12px 16px; margin:14px 0; font-size:16.5px}
+.tip{background:var(--yellow-soft); display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:center}
+.tip svg{flex:none}
+.tip p{margin:0}
+.words{background:var(--blue-soft)}
+.words b{font-weight:800}
+.words .wh{font-family:var(--f-disp); font-weight:600; display:block; margin-bottom:2px; font-size:17px}
+[hidden]{display:none!important}
+.try{background:var(--green-soft)}
+.try b.l{font-family:var(--f-disp); font-weight:600}
+.snip{background:var(--code-bg); color:var(--code-fg); border-radius:12px; padding:12px 16px; font-family:var(--f-mono); font-size:14.5px; overflow-x:auto; margin:10px 0 14px; line-height:1.6; white-space:pre; font-variant-ligatures:none}
+.snip i{font-style:normal}
+.snip .c{color:var(--t-c)} .snip .k{color:var(--t-k)} .snip .b{color:var(--t-b)} .snip .s{color:var(--t-s)} .snip .n{color:var(--t-n)} .snip .f{color:var(--t-f)}
+.snip.outp{background:#0a101f; color:#d7ffe0; border-left:4px solid var(--green)}
+.codecard{border-radius:16px; overflow:hidden; background:var(--code-bg); border:1px solid var(--code-line)}
+.cbar{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 12px; color:var(--code-dim); font-size:13.5px; font-weight:700; border-bottom:1px solid var(--code-line); flex-wrap:wrap}
+.ed{--lh:23px; display:grid; grid-template-columns:auto 1fr; max-height:380px; min-height:150px; overflow:auto; font-family:var(--f-mono); font-size:14.5px; line-height:var(--lh); font-variant-ligatures:none; tab-size:4}
+.gut{position:sticky; left:0; z-index:1; background:var(--code-bg); color:var(--code-dim); text-align:right; padding:12px 10px 12px 14px; user-select:none; border-right:1px solid var(--code-line)}
+.gut span{display:block; height:var(--lh)}
+.gut span.bad{color:#fff; background:var(--red); border-radius:4px; margin-right:-4px; padding-right:4px}
+.cw{display:grid; padding:12px 16px; min-width:0}
+.cw>*{grid-area:1/1; margin:0; font:inherit; line-height:inherit; letter-spacing:0; white-space:pre; tab-size:4; word-spacing:0}
+.hl{color:var(--code-fg); pointer-events:none}
+.hl .c{color:var(--t-c); font-style:italic} .hl .k{color:var(--t-k)} .hl .b{color:var(--t-b)} .hl .s{color:var(--t-s)} .hl .n{color:var(--t-n)} .hl .f{color:var(--t-f)}
+.hl i{font-style:normal}.hl i.c{font-style:italic}
+.ta{background:transparent; color:transparent; caret-color:#fff; border:0; outline:0; resize:none; overflow:hidden; padding:0; width:100%; height:100%; min-width:0; z-index:1}
+.ta::selection{background:rgba(124,166,255,.4); color:transparent}
+.actions{display:flex; gap:8px; flex-wrap:wrap; padding:10px 12px; border-top:1px solid var(--code-line); background:#0d1528}
+.actions .btn.sec{color:#cfe0ff; border-color:#3a4c7a}
+.con{margin-top:12px; border-radius:16px; background:#0a101f; border:1px solid var(--code-line); color:#d7ffe0; overflow:hidden}
+.con .cbar{color:#8fa0c8}
+.mini{background:transparent; border:1px solid #3a4c7a; color:#cfe0ff; border-radius:8px; padding:1px 10px; font-size:12.5px; font-weight:700}
+.cbody{padding:12px 16px; min-height:110px; max-height:320px; overflow:auto; font-family:var(--f-mono); font-size:14.5px; line-height:1.55; font-variant-ligatures:none}
+.cbody pre{margin:0; font:inherit; white-space:pre-wrap; overflow-wrap:anywhere}
+.cbody .ph{color:#7c89a8; font-family:var(--f-body); font-size:15px}
+.cbody input{font:inherit; background:#1b2744; border:1px solid #3a4c7a; color:#fff; border-radius:6px; padding:0 6px; min-width:6ch; max-width:100%; outline:0}
+.errcard{background:var(--red-soft); color:var(--ink); border-radius:12px; padding:12px 14px; margin-top:10px; font-family:var(--f-body); font-size:15.5px; line-height:1.5}
+.errcard b{font-family:var(--f-disp); font-weight:600; font-size:17px; color:var(--red); display:block}
+.errcard p{margin:4px 0}
+.banner{border-radius:14px; padding:14px 16px; margin-top:16px; font-size:16.5px}
+.banner.ok{background:var(--green-soft); border:2px solid var(--green)}
+.banner.no{background:var(--red-soft); border:2px solid var(--red)}
+.banner b{font-family:var(--f-disp); font-weight:600; font-size:19px; display:block; margin-bottom:2px}
+.banner pre{margin:6px 0 0; font-family:var(--f-mono); font-size:13.5px; white-space:pre-wrap; background:var(--surface); border-radius:8px; padding:6px 10px; overflow-wrap:anywhere}
+.under{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+.hintbox{background:var(--yellow-soft); border-radius:12px; padding:10px 14px; margin-top:12px; font-size:16px}
+.opts{display:grid; gap:10px; margin:16px 0}
+.opt{text-align:left; background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:12px 16px; font-size:17px; font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--blue)}
+.opt.right{border-color:var(--green); background:var(--green-soft)}
+.opt.wrong{border-color:var(--red); background:var(--red-soft)}
+.opt code{background:transparent}
+
+/* overlay + fx */
+.overlay{position:fixed; inset:0; z-index:40; background:rgba(8,14,30,.6); display:grid; place-items:center; padding:16px}
+.modal{background:var(--surface); border-radius:22px; padding:28px; max-width:460px; width:100%; text-align:center}
+.modal h2{font-size:30px; margin:6px 0}
+.modal .xpbig{font-family:var(--f-disp); font-size:42px; font-weight:700; color:var(--flame)}
+.modal .row{justify-content:center; margin-top:16px}
+.toast{position:fixed; left:50%; transform:translateX(-50%); bottom:max(20px,env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:11px 20px; border-radius:12px; font-weight:700; z-index:60; max-width:calc(100vw - 32px); box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#fx{position:fixed; inset:0; pointer-events:none; z-index:50; overflow:hidden}
+#fx i{position:absolute; top:-12px; width:10px; height:14px; border-radius:2px; animation:fall 1.9s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg); opacity:.9}}
+
+/* profile, cheat sheet */
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.stat{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+.stat b{display:block; font-family:var(--f-disp); font-size:30px; font-weight:600}
+.stat small{color:var(--muted); font-weight:700}
+.heat{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,16px); gap:4px; overflow-x:auto; padding-bottom:4px}
+.heat i{width:16px; height:16px; border-radius:4px; background:var(--surface2)}
+.heat i.l1{background:color-mix(in srgb,var(--green) 35%,var(--surface2))} .heat i.l2{background:color-mix(in srgb,var(--green) 65%,var(--surface2))} .heat i.l3{background:var(--green)}
+.badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px}
+.badge{display:grid; grid-template-columns:44px 1fr; gap:12px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px}
+.badge .g{width:44px; height:44px; border-radius:50%; background:var(--yellow); color:var(--yellow-ink); display:grid; place-items:center; font-weight:800; font-family:var(--f-disp)}
+.badge.lock{opacity:.55}
+.badge.lock .g{background:var(--surface2); color:var(--muted)}
+.badge b{display:block; font-size:15.5px; line-height:1.2}
+.badge small{color:var(--muted); font-size:13.5px; line-height:1.3; display:block}
+.cert{border:3px double var(--yellow); background:var(--surface); border-radius:18px; padding:30px; text-align:center}
+.cert h2{font-size:34px}
+.cert .nm{font-family:var(--f-disp); font-size:40px; color:var(--blue); margin:10px 0}
+.acc details{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:4px 16px; margin-bottom:10px}
+.acc summary{font-family:var(--f-disp); font-weight:600; font-size:20px; padding:10px 0; cursor:pointer}
+.chitem{padding:8px 0 14px; border-top:1px solid var(--line)}
+.chitem h4{font-size:17px; font-family:var(--f-body); font-weight:800; margin-bottom:2px}
+.gl{display:grid; gap:8px}
+.gl div{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 14px}
+.gl b{font-family:var(--f-mono); font-size:15px; color:var(--blue)}
+textarea.big{width:100%; min-height:110px; font-family:var(--f-mono); font-size:13px; background:var(--surface); color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:8px 10px}
+.pg{max-width:900px; margin:0 auto}
+.pg .head{display:flex; gap:12px; flex-wrap:wrap; align-items:end; justify-content:space-between; margin-bottom:14px}
+
+@media (max-width:980px){
+  .home{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+  .pbody{grid-template-columns:minmax(0,1fr)}
+  .cont{grid-template-columns:1fr}
+}
+@media (max-width:560px){ body{font-size:16.5px} .stats .pillstat small{display:none} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<header class="hd"><div class="wrap">
+  <button class="logo" type="button" data-go="home" aria-label="Ten Minute Python home"><svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" style="fill:var(--blue)"/><path d="M20 24c0-7 24-7 24 0 0 6-6 6-12 6s-12 2-12 8c0 7 24 7 24 0" style="fill:none;stroke:#fff;stroke-width:6;stroke-linecap:round;stroke-linejoin:round"/><circle cx="26" cy="19" r="2.6" style="fill:var(--yellow)"/></svg><span>Ten Minute Python</span></button>
+  <nav class="nav" id="nav" aria-label="Main"></nav>
+  <div class="stats"><div class="pillstat" id="hdStreak"></div><div class="pillstat" id="hdXp"></div><button class="iconbtn" id="themeBtn" type="button">Dark</button></div>
+</div></header>
+<main class="wrap view" id="view"></main>
+<div id="fx" aria-hidden="true"></div>
+<div class="toast" id="toast" hidden></div>
+<div id="modalHost"></div>
+
+<script>
+/* ---------- content helpers (lessons live in courses-*.js) ---------- */
+window.PC={courses:[],warm:[],daily:[],cheat:[],gloss:[]};
+window.R=String.raw;
+PC.L=function(title,html,code){return {k:'learn',title:title,html:html,code:code||''}};
+PC.C=function(title,html,starter,tests,hint,sol,o){var s={k:'code',title:title,html:html,starter:starter,tests:tests,hint:hint,sol:sol};if(o)for(var k in o)s[k]=o[k];return s};
+PC.Q=function(q,opts,ans,why){return {k:'quiz',q:q,opts:opts,ans:ans,why:why}};
+PC.tip=function(t){return '<div class="tip">@PIP@<p>'+t+'</p></div>'};
+PC.words=function(t){return '<div class="words"><b class="wh">Words to know</b>'+t+'</div>'};
+PC.go=function(t){return '<div class="try"><b class="l">Your turn.</b> '+t+'</div>'};
+PC.h=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+PC.snip=function(code){return '<div class="snip" data-py>'+PC.h(code.replace(/\n$/,''))+'</div>'};
+PC.out=function(t){return '<div class="snip outp">'+PC.h(t.replace(/\n$/,''))+'</div>'};
+</script>
+<script src="courses-a.js"></script>
+<script src="courses-b.js"></script>
+<script src="courses-c.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s,el){return (el||document).querySelector(s)}, $$=function(s,el){return [].slice.call((el||document).querySelectorAll(s))};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var reduced=false; try{reduced=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+
+/* ---------- storage ---------- */
+var KEY='ten-minute-python-v1';
+function fresh(){return {v:1,name:'',goal:10,onboarded:false,xp:0,days:{},done:{},steps:{},code:{},badges:{},stats:{runs:0,fixes:0,pgRuns:0,warms:0,clean:0},pg:''}}
+function load(){try{var r=localStorage.getItem(KEY); if(r){var o=JSON.parse(r), f=fresh(); for(var k in f) if(!(k in o)) o[k]=f[k]; return o}}catch(e){} return fresh()}
+var store=load();
+var saveT=0; function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+function saveSoon(){clearTimeout(saveT); saveT=setTimeout(save,400)}
+function toast(m){var t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(function(){t.hidden=true},3200)}
+function burst(){ if(reduced)return; var fx=$('#fx'), cols=['#ffc933','#2a58cf','#12a86a','#e8559a','#ff8a3d']; for(var i=0;i<34;i++){var p=document.createElement('i'); p.style.left=Math.random()*100+'%'; p.style.background=cols[i%5]; p.style.animationDelay=(Math.random()*.5)+'s'; p.style.transform='rotate('+Math.random()*90+'deg)'; fx.appendChild(p)} setTimeout(function(){fx.innerHTML=''},2800)}
+
+/* ---------- dates, streaks, time ---------- */
+function pad(n){return n<10?'0'+n:''+n}
+function ymd(d){d=d||new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function addDays(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n)}
+function dget(k){return store.days[k||ymd()]||{sec:0,xp:0,steps:0,plan:{}}}
+function dset(k){k=k||ymd(); return store.days[k]||(store.days[k]={sec:0,xp:0,steps:0,plan:{}})}
+function streak(){var d=new Date(); if(!dget(ymd(d)).met)d=addDays(d,-1); var n=0; while(dget(ymd(d)).met){n++; d=addDays(d,-1)} return n}
+function bestStreak(){var ks=Object.keys(store.days).filter(function(k){return store.days[k].met}).sort(), best=0,run=0,prev=null; ks.forEach(function(k){var p=k.split('-'), d=new Date(+p[0],+p[1]-1,+p[2]); run=(prev&&ymd(addDays(prev,1))===k)?run+1:1; best=Math.max(best,run); prev=d}); return best}
+function minsToday(){return Math.floor(dget().sec/60)}
+var lastAct=Date.now(), ACTIVE=false;
+['keydown','pointerdown','scroll','mousemove','touchstart'].forEach(function(ev){addEventListener(ev,function(){lastAct=Date.now()},{passive:true})});
+setInterval(function(){
+  if(!ACTIVE||document.visibilityState!=='visible'||Date.now()-lastAct>45000)return;
+  var d=dset(); d.sec++;
+  if(!d.met&&d.sec>=store.goal*60){d.met=1; goalReached()}
+  if(d.sec%15===0)save();
+  updateHeader(); var rg=$('#liveRing'); if(rg)rg.innerHTML=ringHTML(Math.min(1,d.sec/(store.goal*60)),96,10,Math.floor(d.sec/60)+'/'+store.goal+' min');
+},1000);
+function goalReached(){ burst(); var n=streak(); toast('Daily goal reached! '+n+' day'+(n===1?'':'s')+' in a row.'); save(); checkBadges() }
+
+/* ---------- xp, levels, badges ---------- */
+var LV=[[0,'Egg'],[50,'Hatchling'],[150,'Snake Charmer'],[300,'Code Cadet'],[500,'Scripter'],[800,'Bug Hunter'],[1200,'Pythonista'],[1800,'Code Wizard'],[2600,'Python Master']];
+function level(){var i=0; while(i+1<LV.length&&store.xp>=LV[i+1][0])i++; var lo=LV[i][0], nx=LV[i+1]; return {n:i+1,name:LV[i][1],lo:lo,hi:nx?nx[0]:lo,p:nx?(store.xp-lo)/(nx[0]-lo):1}}
+function addXP(n){ if(n<=0)return; var before=level().n; store.xp+=n; dset().xp+=n; var after=level(); if(after.n>before){toast('Level up! You are now a '+after.name+'.'); burst()} save(); updateHeader() }
+function allLessons(){var a=[]; PC.courses.forEach(function(c){c.lessons.forEach(function(l,i){a.push([c,i,l])})}); return a}
+function lessonDone(c,i){return !!store.done[c.id+':'+i]}
+function courseDone(c){return c.lessons.every(function(l,i){return lessonDone(c,i)})}
+function courseProg(c){var n=0; c.lessons.forEach(function(l,i){if(lessonDone(c,i))n++}); return n}
+function allDone(){return PC.courses.every(courseDone)}
+var BADGES=[
+ ['run','Hello, World!','Run your first program',function(){return store.stats.runs>=1},'>_'],
+ ['les1','First lesson','Finish a lesson',function(){return Object.keys(store.done).length>=1},'1'],
+ ['les5','Five lessons','Finish 5 lessons',function(){return Object.keys(store.done).length>=5},'5'],
+ ['les15','Fifteen lessons','Finish 15 lessons',function(){return Object.keys(store.done).length>=15},'15'],
+ ['goal','Goal getter','Reach your daily goal once',function(){return Object.keys(store.days).some(function(k){return store.days[k].met})},'✓'],
+ ['s3','3-day streak','Hit your goal 3 days in a row',function(){return Math.max(streak(),bestStreak())>=3},'3'],
+ ['s7','7-day streak','Hit your goal 7 days in a row',function(){return Math.max(streak(),bestStreak())>=7},'7'],
+ ['s14','14-day streak','Two weeks in a row!',function(){return Math.max(streak(),bestStreak())>=14},'14'],
+ ['bug','Bug squasher','Fix 3 broken programs',function(){return store.stats.fixes>=3},'✶'],
+ ['clean','Solo coder','Finish a lesson with no hints and no answers',function(){return store.stats.clean>=1},'★'],
+ ['warm','Warm-up regular','Do 3 daily warm-ups',function(){return store.stats.warms>=3},'W'],
+ ['play','Free explorer','Run 5 programs in the Playground',function(){return store.stats.pgRuns>=5},'P'],
+ ['xp500','500 XP','Earn 500 XP',function(){return store.xp>=500},'XP'],
+ ['course','Course complete','Finish any whole course',function(){return PC.courses.some(courseDone)},'C'],
+ ['all','Python Basics graduate','Finish every course',function(){return allDone()},'♕']
+];
+function checkBadges(){ BADGES.forEach(function(b){ if(!store.badges[b[0]]&&b[3]()){store.badges[b[0]]=ymd(); toast('Badge unlocked: '+b[1]); burst(); save()} }) }
+
+/* ---------- small svg pieces ---------- */
+function pip(sz,mood){sz=sz||56; var m=mood==='yay'?'M25 38 Q32 47 39 38':'M27 40 Q32 44 37 40'; return '<svg class="pip" width="'+sz+'" height="'+sz+'" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 54 C6 44 18 48 26 52 C36 56 48 52 48 44" style="fill:none;stroke:var(--blue);stroke-width:9;stroke-linecap:round"/><circle cx="32" cy="28" r="20" style="fill:var(--blue)"/><circle cx="25" cy="25" r="5.6" style="fill:#fff"/><circle cx="39" cy="25" r="5.6" style="fill:#fff"/><circle cx="26" cy="26" r="2.7" style="fill:#16213a"/><circle cx="40" cy="26" r="2.7" style="fill:#16213a"/><path d="'+m+'" style="fill:none;stroke:#fff;stroke-width:2.8;stroke-linecap:round"/><circle cx="17" cy="33" r="3" style="fill:#ffc933;opacity:.85"/><circle cx="47" cy="33" r="3" style="fill:#ffc933;opacity:.85"/></svg>'}
+var FLAME='<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 2c.6 3.6 5.5 5.6 5.5 11a6 6 0 0 1-12 0c0-2.2 1-3.7 2.3-4.8.1 1.8.9 2.9 2 3.3C10 8 10.2 4.8 12.5 2z" style="fill:currentColor"/></svg>';
+function ringHTML(p,size,sw,label){var r=(size-sw)/2, c=2*Math.PI*r; return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="'+esc(label)+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" style="fill:none;stroke:var(--surface2);stroke-width:'+sw+'"/><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" transform="rotate(-90 '+size/2+' '+size/2+')" style="fill:none;stroke:'+(p>=1?'var(--green)':'var(--yellow)')+';stroke-width:'+sw+';stroke-linecap:round;stroke-dasharray:'+c+';stroke-dashoffset:'+(c*(1-p))+'"/></svg><b>'+esc(label)+'</b>'}
+function fillPip(h){return h.replace(/@PIP@/g,pip(46))}
+
+/* ---------- python engine (Skulpt) ---------- */
+function builtinRead(x){ if(Sk.builtinFiles===undefined||Sk.builtinFiles['files'][x]===undefined)throw "File not found: '"+x+"'"; return Sk.builtinFiles['files'][x] }
+function cfg(outFn,inFn){ var total=0, capped=false; Sk.configure({output:function(t){ total+=t.length; if(total>20000){ if(!capped){capped=true; try{Sk.execLimit=1}catch(e){}} return } outFn(t) },read:builtinRead,__future__:Sk.python3,execLimit:4000,inputfun:inFn,inputfunTakesPrompt:true}) }
+function runRaw(code){ return Sk.misceval.asyncToPromise(function(){return Sk.importMainWithBody('<stdin>',false,code,true)}) }
+function execHeadless(code,stdin){
+  var out='', q=(stdin||[]).slice();
+  cfg(function(t){out+=t},function(p){ if(!q.length)throw new Error('EOFError: your program asked for more input than the check provided'); return q.shift() });
+  return runRaw(code).then(function(){return {out:out,err:null}},function(e){return {out:out,err:e}});
+}
+var BUILTINS={print:1,input:1,len:1,range:1,int:1,str:1,float:1,sorted:1,sum:1,min:1,max:1,round:1,list:1,type:1};
+var ERR={
+ NameError:{t:'Python does not know that name',why:'You used a word that Python has not met yet. It is usually a typo, or a variable you forgot to create first.',fix:'Check the spelling (capital letters matter!) and make sure the variable is created on an earlier line.'},
+ SyntaxError:{t:'Python could not read this line',why:'The code is not written in a way Python understands, like a sentence with a missing full stop.',fix:'Look at the line shown (and the one above it). Are all quotes and brackets closed? Is there a colon <code>:</code> at the end of lines that start with <code>if</code>, <code>for</code>, <code>while</code> or <code>def</code>? Are the lines inside indented by 4 spaces?'},
+ IndentationError:{t:'The spacing at the start of a line is off',why:'Python uses spaces at the start of a line to know which lines belong together.',fix:'Lines inside an <code>if</code>, <code>for</code>, <code>while</code> or <code>def</code> need the same 4 spaces. Press Tab to add them.'},
+ TypeError:{t:'You mixed things that do not fit together',why:'Python cannot do that operation with those kinds of values, like adding a word to a number.',fix:'Check what kind of value each part is. <code>str()</code> turns a number into text and <code>int()</code> turns text into a whole number.'},
+ ValueError:{t:'The value looks wrong for this job',why:'The kind of value is right, but this particular value does not work.',fix:'For example <code>int("hello")</code> fails because "hello" is not a number. Check what you pass in.'},
+ IndexError:{t:'That position does not exist',why:'You asked for an item at a spot that is past the end of the list or text.',fix:'Counting starts at 0, so a list with 3 items has positions 0, 1 and 2. Use <code>len()</code> to check the size.'},
+ KeyError:{t:'That key is not in the dictionary',why:'You asked a dictionary for a key that it does not have.',fix:'Check the spelling of the key, or use <code>.get("key")</code> which does not crash.'},
+ ZeroDivisionError:{t:'You cannot divide by zero',why:'Dividing by zero has no answer, in maths and in Python.',fix:'Check which number ends up as 0, or use an <code>if</code> to avoid dividing when it is 0.'},
+ AttributeError:{t:'That thing does not have that tool',why:'You tried to use a method (a tool written like <code>.name()</code>) that this kind of value does not have.',fix:'Check the spelling of the method, and that the value is the kind you think it is. Use <code>type()</code> to check.'},
+ TimeLimitError:{t:'Your program ran for too long',why:'It probably got stuck in a loop that never ends.',fix:'In a <code>while</code> loop, make sure something inside the loop changes so the condition becomes False one day.'},
+ EOFError:{t:'The program wanted more input',why:'It called <code>input()</code> but no more answers were given.',fix:'Type an answer in the box that appears in the output.'},
+ Other:{t:'Something went wrong',why:'Python stopped because of a problem it could not get past.',fix:'Read the message and the line number. They point to where to look.'}
+};
+function friendly(e){
+  var s=String(e&&e.toString?e.toString():e), type=(e&&e.tp$name)||((s.match(/^(\w+)/)||[])[1])||'Other', lm=s.match(/ on line (\d+)/), line=lm?+lm[1]:((e&&e.traceback&&e.traceback[0]&&e.traceback[0].lineno)||0);
+  var msg=s.replace(/^\w+:\s*/,'').replace(/ on line \d+\s*$/,'');
+  if(type==='Error')type='Other'; var info=ERR[type]||ERR.Other, extra='';
+  if(type==='NameError'){var m=msg.match(/name '(\w+)'/); if(m){var lw=m[1].toLowerCase(); extra=BUILTINS[lw]&&m[1]!==lw?' Python is case-sensitive: write <code>'+lw+'</code>, not <code>'+m[1]+'</code>.':' Python does not know <code>'+esc(m[1])+'</code>. Did you spell it exactly like the variable you made?'}}
+  if(type==='SyntaxError'){ if(/EOF/.test(msg))extra=' This one often means a quote or bracket was opened but never closed.'; else if(/bad input/.test(msg))extra=' This one often means a missing colon, or lines that are not lined up.' }
+  if(type==='TypeError'&&/concatenate/.test(msg))extra=' You tried to join text and a number with <code>+</code>. Use <code>str(number)</code> or an f-string.';
+  if(type==='ValueError'&&/int\(\)/.test(msg))extra=' <code>int()</code> only works on text that looks like a whole number, such as "12".';
+  if(type==='KeyError')extra=' The missing key is <code>'+esc(msg)+'</code>.';
+  return {type:type,msg:msg,line:line,info:info,extra:extra};
+}
+function errHTML(f){return '<div class="errcard"><b>Oops, '+esc(f.info.t)+'</b><p><code>'+esc(f.type)+(f.line?' on line '+f.line:'')+': '+esc(f.msg)+'</code></p><p>'+f.info.why+'</p><p><b style="display:inline;font-size:inherit;color:inherit">Try this:</b> '+f.info.fix+f.extra+'</p></div>'}
+
+/* ---------- code editor (textarea over a highlighted layer) ---------- */
+var KW={}; 'and as assert break class continue def del elif else except finally for from global if import in is lambda not or pass raise return try while with yield True False None'.split(' ').forEach(function(w){KW[w]=1});
+var BI={}; 'print input len range int str float bool list dict set tuple type sorted sum min max abs round enumerate zip'.split(' ').forEach(function(w){BI[w]=1});
+function highlight(src){
+  var re=/(#[^\n]*)|("""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)|[fFrRbB]{0,2}"(?:\\.|[^"\\\n])*"?|[fFrRbB]{0,2}'(?:\\.|[^'\\\n])*'?)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)/g;
+  var out='', last=0, m, prev='';
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index)); last=re.lastIndex; var t=m[0];
+    if(m[1])out+='<i class="c">'+esc(t)+'</i>';
+    else if(m[2])out+='<i class="s">'+esc(t)+'</i>';
+    else if(m[3])out+='<i class="n">'+esc(t)+'</i>';
+    else{var c=KW[t]?'k':BI[t]?'b':(prev==='def'?'f':''); out+=c?'<i class="'+c+'">'+esc(t)+'</i>':esc(t); prev=t}
+  }
+  return out+esc(src.slice(last));
+}
+function makeEditor(host,onRun){
+  host.innerHTML='<div class="ed"><div class="gut" aria-hidden="true"></div><div class="cw"><pre class="hl" aria-hidden="true"></pre><textarea class="ta" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" wrap="off" aria-label="Python code editor. Press Control plus Enter to run."></textarea></div></div>';
+  var ta=$('.ta',host), hl=$('.hl',host), gut=$('.gut',host), errLine=0, cb=null;
+  function paint(){var v=ta.value, n=v.split('\n').length, g=''; hl.innerHTML=highlight(v)+'\n'; for(var i=1;i<=n;i++)g+='<span'+(i===errLine?' class="bad"':'')+'>'+i+'</span>'; gut.innerHTML=g}
+  function ins(text){ ta.focus(); var ok=false; try{ok=document.execCommand('insertText',false,text)}catch(e){} if(!ok){var s=ta.selectionStart; ta.setRangeText(text,s,ta.selectionEnd,'end'); ta.dispatchEvent(new Event('input'))} }
+  ta.addEventListener('input',function(){errLine=0; paint(); if(cb)cb(ta.value)});
+  ta.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault(); onRun&&onRun(); return}
+    if(e.key==='Tab'){e.preventDefault(); if(e.shiftKey){var s=ta.selectionStart, ls=ta.value.lastIndexOf('\n',s-1)+1, m=ta.value.slice(ls).match(/^ {1,4}/); if(m){ta.setSelectionRange(ls,ls+m[0].length); ins(''); ta.setSelectionRange(Math.max(ls,s-m[0].length),Math.max(ls,s-m[0].length))}} else ins('    '); return}
+    if(e.key==='Enter'&&!e.shiftKey&&!e.ctrlKey){var p=ta.selectionStart, before=ta.value.slice(0,p), line=before.slice(before.lastIndexOf('\n')+1), ind=(line.match(/^ */)||[''])[0]; if(/:\s*$/.test(line.replace(/#.*$/,'')))ind+='    '; e.preventDefault(); ins('\n'+ind); return}
+    if(e.key==='Backspace'&&ta.selectionStart===ta.selectionEnd){var q=ta.selectionStart, b=ta.value.slice(0,q), ln=b.slice(b.lastIndexOf('\n')+1); if(ln.length>0&&/^ +$/.test(ln)&&ln.length%4===0){e.preventDefault(); ta.setSelectionRange(q-4,q); ins('')}}
+  });
+  var api={get:function(){return ta.value}, set:function(v){ta.value=v; errLine=0; paint()}, onChange:function(f){cb=f}, mark:function(l){errLine=l||0; paint()}, focus:function(){ta.focus()}};
+  paint(); return api;
+}
+function makeConsole(host){
+  host.innerHTML='<div class="cbar"><span>Output</span><button class="mini" type="button" data-con="clear">Clear</button></div><div class="cbody" tabindex="0" aria-live="polite"></div>';
+  var body=$('.cbody',host), cur=null, pend=null;
+  function ph(){body.innerHTML='<div class="ph">Press <b>Run</b> to see what your code does. Your results show up here.</div>'; cur=null}
+  function pre(){ if(!cur){ if($('.ph',body))body.innerHTML=''; cur=document.createElement('pre'); body.appendChild(cur)} return cur }
+  var api={
+    clear:function(){ph()},
+    print:function(t){ var p=pre(); p.appendChild(document.createTextNode(t)); body.scrollTop=body.scrollHeight },
+    err:function(h){ if($('.ph',body))body.innerHTML=''; var d=document.createElement('div'); d.innerHTML=h; body.appendChild(d.firstChild); cur=null; body.scrollTop=body.scrollHeight },
+    ask:function(prompt){ return new Promise(function(res,rej){ var p=pre(); if(prompt)p.appendChild(document.createTextNode(prompt)); var inp=document.createElement('input'); inp.type='text'; inp.setAttribute('aria-label','Type your answer and press Enter'); p.appendChild(inp); inp.focus(); body.scrollTop=body.scrollHeight;
+      pend={rej:rej,inp:inp};
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); var v=inp.value; var s=document.createTextNode(v+'\n'); p.replaceChild(s,inp); pend=null; try{Sk.execStart=Date.now()}catch(x){} res(v) } }) }) },
+    cancelInput:function(){ if(pend){ var e=new Error('stopped'); pend.rej(e); pend=null } }
+  };
+  host.addEventListener('click',function(e){ if(e.target.closest('[data-con="clear"]'))ph() });
+  ph(); return api;
+}
+
+/* ---------- running + checking ---------- */
+var RUNNING=false;
+function norm(s){return String(s).replace(/\r/g,'').split('\n').map(function(l){return l.replace(/\s+$/,'')}).join('\n').replace(/\n+$/,'')}
+function runInConsole(code,con){
+  if(RUNNING)return Promise.resolve({ok:false,busy:true});
+  RUNNING=true; con.clear(); var out='';
+  cfg(function(t){out+=t; con.print(t)},function(p){return con.ask(p)});
+  return runRaw(code).then(function(){RUNNING=false; return {ok:true,out:out}},function(e){
+    RUNNING=false; if(e&&e.message==='stopped'){con.print('\n(stopped)'); return {ok:false,stopped:true,out:out}}
+    var f=friendly(e); con.err(errHTML(f)); return {ok:false,err:f,out:out};
+  });
+}
+function stopRun(con){ try{Sk.execLimit=1}catch(e){} con.cancelInput&&con.cancelInput() }
+async function runChecks(step,code){
+  var res=[], ok=true;
+  for(var i=0;i<step.tests.length;i++){
+    var t=step.tests[i];
+    if(t.s){ var src=t.raw?code:code.replace(/^\s*#.*$/gm,''); var pass=t.s.test(src); res.push({ok:pass,msg:t.m||'Your code is missing something we asked for.'}); if(!pass)ok=false; continue }
+    var prog=code+(t.a?'\nprint("<<TEST>>")\n'+t.a+'\n':'');
+    var r=await execHeadless(prog,t.i||[]);
+    if(r.err){ok=false; res.push({ok:false,err:friendly(r.err),t:t}); continue}
+    var got=r.out; if(t.a){var ix=got.indexOf('<<TEST>>\n'); got=ix>=0?got.slice(ix+9):''}
+    got=norm(got); var pass2=t.r?t.r.test(got):got===norm(t.o);
+    if(!pass2)ok=false; res.push({ok:pass2,got:got,t:t});
+  }
+  return {ok:ok,res:res};
+}
+function checkHTML(r){
+  var bad=r.res.filter(function(x){return !x.ok}), h='<div class="banner no"><b>Not quite yet</b>'+(r.res.length>1?'<span>'+(r.res.length-bad.length)+' of '+r.res.length+' checks passed.</span>':'')+'</div>';
+  var f=bad[0], d='';
+  if(f.msg)d='<p style="margin:6px 0 0">'+esc(f.msg)+'</p>';
+  else if(f.err){d='<p style="margin:6px 0 0">Your code stopped with an error ('+esc(f.err.type)+(f.err.line?' on line '+f.err.line:'')+'): <code>'+esc(f.err.msg)+'</code>. Press Run to see friendly help.</p>'}
+  else{ var t=f.t; d='<p style="margin:6px 0 0">'+(t.i?'When the answers typed in are <code>'+esc(t.i.join(', '))+'</code>:':'Your output does not match yet.')+'</p>'+(t.o!==undefined?'<p style="margin:6px 0 0">We expected:</p><pre>'+esc(norm(t.o)||'(nothing)')+'</pre>':'<p style="margin:6px 0 0">'+esc(t.m||'The output is not what we asked for.')+'</p>')+'<p style="margin:6px 0 0">Your code printed:</p><pre>'+esc(f.got||'(nothing)')+'</pre>' }
+  return '<div class="banner no" style="margin-top:16px"><b>Not quite yet</b>'+(r.res.length>1?'<span>'+(r.res.length-bad.length)+' of '+r.res.length+' checks passed. </span>':'')+'Here is the first thing that did not match.'+d+'</div>';
+}
+
+/* ---------- player (lessons, warm-up, challenge) ---------- */
+var P=null, view=$('#view');
+function stepKey(seq,i){return seq.key?seq.key+':'+i:null}
+function firstOpen(seq){for(var i=0;i<seq.steps.length;i++){if(!store.steps[stepKey(seq,i)])return i} return seq.steps.length}
+function openSeq(seq,start){
+  ACTIVE=true; P={seq:seq,i:start||0,tries:0,peeked:false,hints:0,lessonHints:0,lessonPeek:0,ed:null,con:null,passed:false};
+  renderStep();
+}
+function segsHTML(){return P.seq.steps.map(function(s,i){var d=P.seq.key&&store.steps[stepKey(P.seq,i)]||P.seq.doneIdx&&P.seq.doneIdx[i]; return '<i class="'+(i===P.i?'cur':d?'done':'')+'"></i>'}).join('')}
+function renderStep(){
+  var s=P.seq.steps[P.i]; P.tries=0; P.peeked=false; P.passed=false; P.hinted=false;
+  var top='<div class="ptop"><button class="back" type="button" data-act="exit">← Back</button><div class="ptitle"><small>'+esc(P.seq.course||'')+'</small><b>'+esc(P.seq.title)+'</b></div><div class="segs" aria-label="Step '+(P.i+1)+' of '+P.seq.steps.length+'">'+segsHTML()+'</div></div>';
+  var body='';
+  if(s.k==='quiz'){
+    body='<div class="pbody single"><article class="card txt prose"><div class="eyebrow">Quick question</div><h2>'+esc(s.q)+'</h2><div class="opts">'+s.opts.map(function(o,i){return '<button type="button" class="opt" data-opt="'+i+'">'+o+'</button>'}).join('')+'</div><div id="fb" aria-live="polite"></div></article></div>';
+  } else {
+    var eb=s.k==='learn'?'Learn':(s.fix?'Bug squash':'Your turn');
+    body='<div class="pbody"><article class="card txt prose"><div class="eyebrow">'+eb+'</div><h2>'+esc(s.title)+'</h2>'+fillPip(s.html)+'<div id="hintBox"></div><div id="fb" aria-live="polite"></div><div class="under" id="under"></div></article><div class="pane"><div class="codecard"><div class="cbar"><span>main.py</span><span>Tip: Ctrl+Enter runs your code</span></div><div id="edHost"></div><div class="actions" id="acts"></div></div><div class="con" id="conHost"></div></div></div>';
+  }
+  view.innerHTML='<section class="player">'+top+body+'</section>'; window.scrollTo(0,0);
+  $$('.snip[data-py]',view).forEach(function(el){el.innerHTML=highlight(el.textContent); el.removeAttribute('data-py')});
+  if(s.k==='quiz')return;
+  P.ed=makeEditor($('#edHost'),doRun); P.con=makeConsole($('#conHost'));
+  var key=stepKey(P.seq,P.i), saved=key&&store.code[key];
+  P.ed.set(saved!==undefined&&saved!==null?saved:(s.k==='learn'?s.code:s.starter));
+  P.ed.onChange(function(v){ if(key){store.code[key]=v; saveSoon()} });
+  drawActs();
+}
+function drawActs(){
+  var s=P.seq.steps[P.i], a='';
+  a+='<button class="btn sec sm" type="button" data-act="run" id="runBtn">▶ Run</button><button class="btn sec sm" type="button" data-act="stop" id="stopBtn" hidden>Stop</button>';
+  a+='<button class="btn sec sm" type="button" data-act="reset">Start over</button>';
+  if(s.k==='code')a+='<button class="btn yel sm" type="button" data-act="check" id="checkBtn" style="margin-left:auto">Check my code</button>';
+  $('#acts').innerHTML=a;
+  var u='';
+  if(s.k==='learn')u='<button class="btn good" type="button" data-act="next">Continue →</button>';
+  else u='<button class="btn sec sm" type="button" data-act="hint">Give me a hint</button><button class="btn sec sm" type="button" data-act="sol" id="solBtn" hidden>Show the answer</button>';
+  $('#under').innerHTML=u;
+}
+async function doRun(){
+  if(!P||!P.ed||RUNNING)return; var s=P.seq.steps[P.i];
+  var rb=$('#runBtn'), sb=$('#stopBtn'); if(rb)rb.disabled=true; if(sb)sb.hidden=false; P.ed.mark(0);
+  var r=await runInConsole(P.ed.get(),P.con);
+  if(rb)rb.disabled=false; if(sb)sb.hidden=true;
+  if(r.ok){store.stats.runs++; checkBadges(); save()} else if(r.err&&r.err.line)P.ed.mark(r.err.line);
+}
+async function doCheck(){
+  if(RUNNING)return; var s=P.seq.steps[P.i], btn=$('#checkBtn'); btn.disabled=true; btn.textContent='Checking...';
+  var code=P.ed.get(), r=await runChecks(s,code); btn.disabled=false; btn.textContent='Check my code';
+  var fb=$('#fb');
+  if(r.ok){
+    P.passed=true; var gain=0;
+    if(!P.seq.noXp){ var k=stepKey(P.seq,P.i); if(!k||!store.steps[k]){ gain=P.peeked?8:(P.tries===0?20:15); if(k)store.steps[k]=1; addXP(gain); if(s.fix&&!P.peeked){store.stats.fixes++} dset().steps++ } }
+    if(P.seq.kind==='daily')P.seq.gain=gain;
+    var last=P.i===P.seq.steps.length-1;
+    fb.innerHTML='<div class="banner ok"><b>'+(P.tries===0&&!P.peeked?'Perfect, first try!':'You got it!')+'</b>'+(gain?'+'+gain+' XP. ':'')+'Every check passed.</div>';
+    $('#under').innerHTML='<button class="btn good" type="button" data-act="next">'+(last?'Finish':'Continue')+' →</button>';
+    burst(); checkBadges(); save();
+  } else {
+    P.tries++; fb.innerHTML=checkHTML(r); var f=r.res.filter(function(x){return !x.ok})[0]; if(f&&f.err&&f.err.line)P.ed.mark(f.err.line);
+    if(P.tries>=2){var sb=$('#solBtn'); if(sb)sb.hidden=false}
+  }
+}
+function lessonFinished(){
+  var seq=P.seq; if(seq.kind==='lesson'){
+    var lk=seq.courseId+':'+seq.lessonIdx, first=!store.done[lk]; store.done[lk]=ymd(); var bonus=0;
+    if(first){bonus=20; addXP(20); if(P.lessonHints===0&&P.lessonPeek===0)store.stats.clean++}
+    save(); checkBadges(); showDone(seq,bonus); return;
+  }
+  if(seq.kind==='warm'){ var d=dset(); if(!d.plan.warm){d.plan.warm=1; addXP(10); store.stats.warms++} save(); checkBadges(); showDone(seq,10); return }
+  if(seq.kind==='daily'){ var d2=dset(); if(!d2.plan.chal){d2.plan.chal=1; addXP(10)} save(); showDone(seq,10); return }
+}
+function showDone(seq,bonus){
+  var c=seq.courseId?PC.courses.filter(function(x){return x.id===seq.courseId})[0]:null, nextBtn='', n=streak(), d=dget();
+  if(seq.kind==='lesson'){ var ni=seq.lessonIdx+1; if(ni<c.lessons.length)nextBtn='<button class="btn" data-go="l-'+c.id+'-'+(ni+1)+'">Next lesson →</button>'; else if(courseDone(c)){ var nc=PC.courses[PC.courses.indexOf(c)+1]; nextBtn=nc?'<button class="btn" data-go="c-'+nc.id+'">Next course: '+esc(nc.title)+'</button>':'<button class="btn" data-go="profile">See your certificate</button>' } }
+  var goalLine=d.met?'Daily goal reached.':'You have '+Math.floor(d.sec/60)+' of '+store.goal+' minutes today.';
+  var title=seq.kind==='lesson'?'Lesson complete!':'Nice work!';
+  $('#modalHost').innerHTML='<div class="overlay" role="dialog" aria-modal="true" aria-label="Done"><div class="modal">'+pip(90,'yay')+'<h2>'+title+'</h2><p class="muted">'+esc(seq.title)+'</p><div class="xpbig">+'+(bonus||0)+' XP</div><p class="muted">'+goalLine+(n?' Streak: '+n+' day'+(n===1?'':'s')+'.':'')+'</p><div class="row">'+nextBtn+'<button class="btn sec" data-go="'+(c?'c-'+c.id:'home')+'">'+(c?'Back to course':'Home')+'</button></div></div></div>';
+  burst(); if(courseDone&&c&&courseDone(c))toast('Course complete: '+c.title+'!');
+}
+function nextStep(){
+  P.lessonHints+=P.hints; P.hints=0; var s=P.seq.steps[P.i], k=stepKey(P.seq,P.i);
+  if(s.k==='learn'&&!P.seq.noXp&&k&&!store.steps[k]){store.steps[k]=1; addXP(5); dset().steps++}
+  if(P.seq.doneIdx)P.seq.doneIdx[P.i]=1;
+  if(P.i<P.seq.steps.length-1){P.i++; renderStep()} else lessonFinished();
+}
+function quizPick(i){
+  var s=P.seq.steps[P.i]; if(P.answered)return; var btns=$$('.opt'); var ok=i===s.ans;
+  btns[i].classList.add(ok?'right':'wrong'); var fb=$('#fb');
+  if(ok){ P.answered=true; btns.forEach(function(b){b.disabled=true}); var gain=0, k=stepKey(P.seq,P.i); if(!P.seq.noXp&&(!k||!store.steps[k])){gain=P.tries===0?10:5; if(k)store.steps[k]=1; addXP(gain); dset().steps++} if(P.seq.right!==undefined&&P.tries===0)P.seq.right++;
+    fb.innerHTML='<div class="banner ok"><b>'+(P.tries===0?'Correct!':'Yes, that is it!')+'</b>'+s.why+(gain?' (+'+gain+' XP)':'')+'</div><div class="under"><button class="btn good" data-act="next">'+(P.i===P.seq.steps.length-1?'Finish':'Continue')+' →</button></div>'; if(P.seq.doneIdx)P.seq.doneIdx[P.i]=1; checkBadges() }
+  else { P.tries++; btns[i].disabled=true; fb.innerHTML='<div class="banner no"><b>Not this one.</b>Look at the other choices and try again. You can do it.</div>' }
+}
+
+/* ---------- views ---------- */
+function setNav(cur){
+  var items=[['home','Learn'],['playground','Playground'],['cheatsheet','Cheat sheet'],['profile','Profile']];
+  $('#nav').innerHTML=items.map(function(i){return '<button type="button" data-go="'+i[0]+'"'+(i[0]===cur?' aria-current="page"':'')+'>'+i[1]+'</button>'}).join('');
+}
+function updateHeader(){
+  var n=streak(), met=dget().met, lv=level();
+  var h=$('#hdStreak'); h.className='pillstat '+(n&&met?'hot':n?'hot':'cold'); h.innerHTML=FLAME+'<span>'+n+'</span><small>day'+(n===1?'':'s')+'</small>'; h.title=met?'Goal reached today':'Reach your goal today to keep the streak';
+  $('#hdXp').innerHTML='<span>'+store.xp+'</span><small>XP · '+esc(lv.name)+'</small>';
+}
+function nextUp(){
+  var all=allLessons(); for(var i=0;i<all.length;i++){var c=all[i][0], li=all[i][1]; if(!lessonDone(c,li))return {c:c,i:li,l:all[i][2]}} return null;
+}
+function minutesFor(l){return Math.max(2,Math.round(l.steps.length*1.6))}
+function weekHTML(){
+  var d=new Date(), h='', names=['M','T','W','T','F','S','S'];
+  for(var i=6;i>=0;i--){var x=addDays(d,-i), k=ymd(x), on=dget(k).met; h+='<span>'+names[(x.getDay()+6)%7]+'<i class="'+(on?'on':'')+(i===0?' today':'')+'">'+(on?FLAME.replace(/width="20" height="20"/,'width="14" height="14"'):'')+'</i></span>'}
+  return '<div class="week">'+h+'</div>';
+}
+function viewHome(){
+  ACTIVE=false; setNav('home'); var nu=nextUp(), d=dget(), lv=level(), n=streak(), pct=Math.min(1,d.sec/(store.goal*60));
+  var greet=store.name?'Hi '+esc(store.name)+'!':'Welcome!';
+  var hero='<div class="hero"><h1>'+greet+' Learn Python in '+store.goal+' minutes a day.</h1><p>No experience needed. Read a small idea, type a little code, and watch it work. We explain every step in plain words.</p></div>';
+  var onb=store.onboarded?'':'<div class="card welcome"><h3>Quick setup (10 seconds)</h3><div class="row" style="margin-top:10px;align-items:end"><div class="field"><label for="obName">What should we call you?</label><input id="obName" type="text" maxlength="24" placeholder="Your first name"></div><div class="field"><label for="obGoal">Daily goal</label><select id="obGoal"><option value="5">5 minutes</option><option value="10" selected>10 minutes (recommended)</option><option value="15">15 minutes</option><option value="20">20 minutes</option></select></div><button class="btn" type="button" data-act="onboard">Let us go</button></div><p class="muted" style="margin:10px 0 0;font-size:15px">A day counts toward your streak when you reach your goal. Small and steady beats long and rare.</p></div>';
+  var cont='';
+  if(nu){ var started=Object.keys(store.steps).length>0; cont='<div class="cont"><div>'+pip(70,'yay')+'</div><div class="t"><small>'+(started?'Continue where you left off':'Start here')+'</small><b>'+esc(nu.c.title)+': '+esc(nu.l.t)+'</b><small>About '+minutesFor(nu.l)+' minutes</small></div><button class="btn" data-go="l-'+nu.c.id+'-'+(nu.i+1)+'">'+(started?'Continue':'Start')+' →</button></div>' }
+  else cont='<div class="cont"><div>'+pip(70,'yay')+'</div><div class="t"><small>Every lesson is done!</small><b>You finished the whole course.</b></div><button class="btn" data-go="profile">Get your certificate</button></div>';
+  var pl=d.plan||{}, plan='<div class="plan"><div class="it '+(pl.warm?'ok':'')+'"><span class="n">'+(pl.warm?'✓':'1')+'</span><div><b>Warm-up</b><small>3 quick questions · about 2 minutes</small></div><button class="btn sm '+(pl.warm?'sec':'')+'" data-go="warmup">'+(pl.warm?'Again':'Start')+'</button></div>'+
+   '<div class="it '+(pct>=1?'ok':'')+'"><span class="n">'+(pct>=1?'✓':'2')+'</span><div><b>Learn something new</b><small>'+Math.min(store.goal,Math.floor(d.sec/60))+' of '+store.goal+' minutes done today</small></div><button class="btn sm sec" data-go="'+(nu?'l-'+nu.c.id+'-'+(nu.i+1):'playground')+'">Open</button></div>'+
+   '<div class="it '+(pl.chal?'ok':'')+'"><span class="n">'+(pl.chal?'✓':'3')+'</span><div><b>Daily challenge</b><small>One small puzzle · about 3 minutes</small></div><button class="btn sm '+(pl.chal?'sec':'')+'" data-go="challenge">'+(pl.chal?'Again':'Start')+'</button></div></div>';
+  var cs=PC.courses.map(function(c,i){var p=courseProg(c), tot=c.lessons.length, tm=c.lessons.reduce(function(a,l){return a+minutesFor(l)},0);
+    return '<button class="course" type="button" data-go="c-'+c.id+'" style="--cc:var(--'+c.cc+')"><div class="row" style="flex-wrap:nowrap"><span class="glyph" aria-hidden="true">'+esc(c.icon)+'</span><div>'+(courseDone(c)?'<span class="tag done">Complete</span>':(i===0&&!p?'<span class="tag">Start here</span>':''))+'<h3>'+esc(c.title)+'</h3></div></div><p>'+esc(c.blurb)+'</p><div class="bar"><i style="width:'+(p/tot*100)+'%"></i></div><div class="meta"><span>'+p+' of '+tot+' lessons</span><span>~'+tm+' min</span></div></button>'}).join('');
+  var main='<div>'+hero+onb+cont+'<div class="sect"><h2>Today\'s '+store.goal+'-minute plan</h2></div>'+plan+'<div class="sect"><h2>All courses</h2><span class="muted">'+PC.courses.length+' courses · go in order, or jump around</span></div><div class="courses">'+cs+'</div></div>';
+  var side='<aside class="side"><div class="card streakbox '+(n?'':'cold')+'"><div class="muted" style="font-weight:800">Daily streak</div><div class="big">'+n+'</div><div>'+(n?(d.met?'Goal reached today. See you tomorrow!':'Reach your goal today to keep it going.'):'Reach your goal today to start a streak.')+'</div>'+weekHTML()+'</div>'+
+   '<div class="card"><h3>Today\'s goal</h3><div class="ringbox"><div class="ringwrap" id="liveRing">'+ringHTML(pct,96,10,Math.floor(d.sec/60)+'/'+store.goal+' min')+'</div><div class="muted" style="font-size:15.5px">Time counts while you are learning and moving around the page.</div></div></div>'+
+   '<div class="card"><h3>Level '+lv.n+': '+esc(lv.name)+'</h3><div class="bar xp"><i style="width:'+(lv.p*100)+'%"></i></div><p class="muted" style="margin:8px 0 0;font-size:15px">'+store.xp+' XP'+(lv.hi>lv.lo?' · '+(lv.hi-store.xp)+' to next level':'')+'</p></div></aside>';
+  view.innerHTML='<div class="home">'+main+side+'</div>'; updateHeader();
+}
+function viewCourse(id){
+  ACTIVE=false; setNav('home'); var c=PC.courses.filter(function(x){return x.id===id})[0]; if(!c){go('home');return}
+  var rows=c.lessons.map(function(l,i){var d=lessonDone(c,i), st=l.steps.filter(function(s,j){return store.steps[c.id+':'+i+':'+j]}).length;
+    return '<button class="lrow '+(d?'done':'')+'" type="button" data-go="l-'+c.id+'-'+(i+1)+'"><span class="n">'+(d?'✓':(i+1))+'</span><span><b>'+esc(l.t)+'</b><small>'+esc(l.s||'')+' '+(d?'· Done':st?'· '+st+' of '+l.steps.length+' steps':'· About '+minutesFor(l)+' min')+'</small></span><span class="btn sm sec" aria-hidden="true">'+(d?'Review':st?'Continue':'Start')+'</span></button>'}).join('');
+  var learn=(c.learn||[]).map(function(x){return '<li>'+x+'</li>'}).join('');
+  view.innerHTML='<button class="crumb" data-go="home">← All courses</button><div class="chead" style="--cc:var(--'+c.cc+')"><span class="glyph" style="width:68px;height:68px;font-size:22px">'+esc(c.icon)+'</span><div><h1>'+esc(c.title)+'</h1><p class="muted" style="margin:4px 0 0">'+esc(c.blurb)+'</p></div></div>'+(learn?'<div class="card prose" style="max-width:820px;margin-bottom:16px"><h3 style="margin-bottom:6px">What you will learn</h3><ul style="margin:0">'+learn+'</ul></div>':'')+'<div class="lessons">'+rows+'</div>';
+}
+function viewLesson(id,n){
+  var c=PC.courses.filter(function(x){return x.id===id})[0]; if(!c||!c.lessons[n-1]){go('home');return}
+  var l=c.lessons[n-1], seq={kind:'lesson',key:c.id+':'+(n-1),courseId:c.id,lessonIdx:n-1,course:c.title,title:l.t,steps:l.steps,back:'c-'+c.id};
+  var st=firstOpen(seq); if(st>=l.steps.length)st=0; openSeq(seq,st);
+}
+function pickDaily(pool,salt){var k=ymd().replace(/-/g,''); var h=0; for(var i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i)+salt)%100003; return h}
+function viewWarm(){
+  var pool=PC.warm.filter(function(q){var c=PC.courses.filter(function(x){return x.id===q.c})[0]; return !c||courseProg(c)>0||q.c==='hello'});
+  if(pool.length<3)pool=PC.warm.slice(); var h=pickDaily(pool,7), picks=[], used={};
+  for(var i=0;i<3&&i<pool.length;i++){var ix=(h+i*5)%pool.length; while(used[ix])ix=(ix+1)%pool.length; used[ix]=1; picks.push(pool[ix])}
+  openSeq({kind:'warm',course:'Daily warm-up',title:'3 quick questions',steps:picks,noXp:true,doneIdx:{},back:'home'},0);
+}
+function viewChallenge(){
+  var pool=PC.daily.filter(function(q){var c=PC.courses.filter(function(x){return x.id===q.c})[0]; return !c||courseProg(c)>0||q.c==='hello'}); if(!pool.length)pool=PC.daily.slice();
+  var step=pool[pickDaily(pool,3)%pool.length];
+  openSeq({kind:'daily',course:'Daily challenge',title:step.title,steps:[step],noXp:true,doneIdx:{},back:'home'},0);
+}
+var TEMPL={'Hello':'print("Hello, world!")\n','A loop':'for i in range(1, 6):\n    print("Number", i)\n','A function':'def greet(name):\n    return "Hi " + name + "!"\n\nprint(greet("Sam"))\n','Ask a question':'name = input("What is your name? ")\nprint(f"Nice to meet you, {name}!")\n','Blank':''};
+function viewPlayground(code){
+  ACTIVE=true; setNav('playground'); var start=code!==undefined?code:(store.pg||TEMPL['Hello']);
+  view.innerHTML='<div class="pg"><div class="head"><div><div class="eyebrow">Playground</div><h1 style="font-size:34px">Try anything</h1><p class="muted" style="margin:4px 0 0">No goals, no grades. Write code, press Run, see what happens.</p></div><div class="field"><label for="tpl">Start from</label><select id="tpl">'+Object.keys(TEMPL).map(function(k){return '<option>'+k+'</option>'}).join('')+'</select></div></div><div class="codecard"><div class="cbar"><span>playground.py</span><span>Ctrl+Enter runs</span></div><div id="edHost"></div><div class="actions"><button class="btn sec sm" data-act="pgrun" id="runBtn">▶ Run</button><button class="btn sec sm" data-act="stop" id="stopBtn" hidden>Stop</button></div></div><div class="con" id="conHost"></div></div>';
+  P={pg:true}; P.ed=makeEditor($('#edHost'),pgRun); P.con=makeConsole($('#conHost')); P.ed.set(start); P.ed.onChange(function(v){store.pg=v; saveSoon()});
+  $('#tpl').addEventListener('change',function(e){P.ed.set(TEMPL[e.target.value]); store.pg=TEMPL[e.target.value]; save()});
+}
+async function pgRun(){ if(RUNNING)return; var rb=$('#runBtn'), sb=$('#stopBtn'); rb.disabled=true; sb.hidden=false; P.ed.mark(0); var r=await runInConsole(P.ed.get(),P.con); rb.disabled=false; sb.hidden=true; if(r.ok){store.stats.runs++; store.stats.pgRuns++; checkBadges(); save()} else if(r.err&&r.err.line)P.ed.mark(r.err.line) }
+function viewCheat(){
+  ACTIVE=true; setNav('cheatsheet');
+  var acc=PC.cheat.map(function(s,i){return '<details'+(i===0?' open':'')+'><summary>'+esc(s.t)+'</summary>'+s.items.map(function(it){return '<div class="chitem"><h4>'+esc(it.h)+'</h4><div class="snip">'+highlight(it.code)+'</div><p class="muted" style="margin:0 0 6px;font-size:15.5px">'+it.n+'</p><button class="btn sm sec" data-try="'+esc(it.code)+'">Try it</button></div>'}).join('')+'</details>'}).join('');
+  var gl=PC.gloss.map(function(g){return '<div><b>'+esc(g.w)+'</b> '+g.d+'</div>'}).join('');
+  view.innerHTML='<div class="pg"><div class="eyebrow">Reference</div><h1 style="font-size:34px;margin-bottom:6px">Python cheat sheet</h1><p class="muted">Forgot how something works? Look here. Press "Try it" to open the example in the Playground.</p><div class="acc">'+acc+'</div><h2 style="margin:26px 0 10px;font-size:26px">Words to know</h2><div class="field" style="max-width:320px;margin-bottom:10px"><label for="glq">Search words</label><input type="text" id="glq" placeholder="variable, loop, string..."></div><div class="gl" id="gl">'+gl+'</div></div>';
+  $('#glq').addEventListener('input',function(e){var q=e.target.value.toLowerCase(); $('#gl').innerHTML=PC.gloss.filter(function(g){return (g.w+g.d).toLowerCase().indexOf(q)>-1}).map(function(g){return '<div><b>'+esc(g.w)+'</b> '+g.d+'</div>'}).join('')||'<div>No match. Try another word.</div>'});
+}
+function viewProfile(){
+  ACTIVE=false; setNav('profile'); var lv=level(), tot=0; Object.keys(store.days).forEach(function(k){tot+=store.days[k].sec});
+  var ld=Object.keys(store.done).length, la=allLessons().length;
+  var heat='', today=new Date(), start=addDays(today,-(7*12-1)-((today.getDay()+6)%7)); for(var i=0;i<7*12;i++){var x=addDays(start,i); if(x>today){heat+='<i style="visibility:hidden"></i>';continue} var d=dget(ymd(x)), p=d.sec/(store.goal*60), cl=d.sec<60?'':p>=1?'l3':p>=.5?'l2':'l1'; heat+='<i class="'+cl+'" title="'+ymd(x)+': '+Math.floor(d.sec/60)+' min"></i>'}
+  var bd=BADGES.map(function(b){var on=store.badges[b[0]]; return '<div class="badge '+(on?'':'lock')+'"><span class="g">'+esc(b[4])+'</span><div><b>'+esc(b[1])+'</b><small>'+esc(b[2])+'</small></div></div>'}).join('');
+  var cert=allDone()?'<div class="cert" style="margin:18px 0"><div class="eyebrow">Certificate</div><h2>Python Basics</h2><p class="muted">This certifies that</p><div class="nm">'+esc(store.name||'You')+'</div><p>finished every lesson in Ten Minute Python: printing, variables, text, decisions, lists, loops, functions, dictionaries and debugging.</p><p class="muted" style="margin:0">'+ymd()+'</p></div>':'<div class="card" style="margin:18px 0"><h3>Certificate</h3><p class="muted" style="margin:4px 0 8px">Finish all '+la+' lessons to unlock your Python Basics certificate. You have done '+ld+'.</p><div class="bar"><i style="width:'+(ld/la*100)+'%"></i></div></div>';
+  view.innerHTML='<div class="pg"><div class="eyebrow">Profile</div><h1 style="font-size:34px;margin-bottom:14px">'+(store.name?esc(store.name):'Your')+' progress</h1><div class="grid3"><div class="stat"><b>'+streak()+'</b><small>Current streak (days)</small></div><div class="stat"><b>'+bestStreak()+'</b><small>Best streak</small></div><div class="stat"><b>'+store.xp+'</b><small>XP · level '+lv.n+' '+esc(lv.name)+'</small></div><div class="stat"><b>'+ld+'/'+la+'</b><small>Lessons done</small></div><div class="stat"><b>'+Math.round(tot/60)+'</b><small>Minutes learned</small></div></div>'+cert+
+   '<h2 style="font-size:24px;margin:24px 0 10px">Last 12 weeks</h2><div class="card"><div class="heat">'+heat+'</div><p class="muted" style="margin:10px 0 0;font-size:14.5px">Darker green means more of your daily goal.</p></div>'+
+   '<h2 style="font-size:24px;margin:24px 0 10px">Badges</h2><div class="badges">'+bd+'</div>'+
+   '<h2 style="font-size:24px;margin:24px 0 10px">Settings</h2><div class="card"><div class="row" style="align-items:end"><div class="field"><label for="setName">Your name</label><input id="setName" type="text" maxlength="24" value="'+esc(store.name)+'"></div><div class="field"><label for="setGoal">Daily goal</label><select id="setGoal">'+[5,10,15,20].map(function(m){return '<option value="'+m+'"'+(m===store.goal?' selected':'')+'>'+m+' minutes</option>'}).join('')+'</select></div><button class="btn" data-act="saveset">Save</button></div></div>'+
+   '<h2 style="font-size:24px;margin:24px 0 10px">Back up your progress</h2><div class="card"><p class="muted" style="margin-top:0">Progress is saved in this browser only. If you clear your browser data it is gone, so copy this text somewhere safe now and then. To restore, paste it back and press Import.</p><textarea class="big" id="bk" aria-label="Progress backup text" spellcheck="false">'+esc(JSON.stringify(store))+'</textarea><div class="row" style="margin-top:10px"><button class="btn sec sm" data-act="copybk">Copy</button><button class="btn sec sm" data-act="impbk">Import</button><button class="btn sec sm" data-act="reset1" id="rs" style="margin-left:auto;color:var(--red);border-color:var(--red)">Reset everything</button></div></div></div>';
+}
+
+/* ---------- routing ---------- */
+function go(h){ if(location.hash==='#'+h){route()} else location.hash=h }
+function route(){
+  $('#modalHost').innerHTML=''; RUNNING=false; var h=location.hash.slice(1)||'home', m;
+  if(P&&P.con)P.con.cancelInput&&P.con.cancelInput();
+  P=null; window.scrollTo(0,0);
+  if(h==='home')viewHome();
+  else if((m=h.match(/^c-([a-z0-9]+)$/)))viewCourse(m[1]);
+  else if((m=h.match(/^l-([a-z0-9]+)-(\d+)$/))){setNav('home'); viewLesson(m[1],+m[2])}
+  else if(h==='warmup'){setNav('home'); viewWarm()}
+  else if(h==='challenge'){setNav('home'); viewChallenge()}
+  else if(h==='playground')viewPlayground();
+  else if(h==='cheatsheet')viewCheat();
+  else if(h==='profile')viewProfile();
+  else viewHome();
+  updateHeader();
+}
+window.addEventListener('hashchange',route);
+function exitPlayer(){ go(P&&P.seq&&P.seq.back||'home') }
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-go]'); if(t){ e.preventDefault(); go(t.dataset.go); return }
+  var tr=e.target.closest('[data-try]'); if(tr){ store.pg=tr.dataset.try; save(); go('playground'); return }
+  var o=e.target.closest('[data-opt]'); if(o&&P&&P.seq){ quizPick(+o.dataset.opt); return }
+  var a=e.target.closest('[data-act]'); if(!a)return; var act=a.dataset.act;
+  if(act==='exit')exitPlayer();
+  else if(act==='run')doRun();
+  else if(act==='pgrun')pgRun();
+  else if(act==='stop'){stopRun(P.con)}
+  else if(act==='reset'){var s=P.seq.steps[P.i]; P.ed.set(s.k==='learn'?s.code:s.starter)}
+  else if(act==='check')doCheck();
+  else if(act==='next')nextStep();
+  else if(act==='hint'){var st=P.seq.steps[P.i]; $('#hintBox').innerHTML='<div class="hintbox"><b>Hint:</b> '+st.hint+'</div>'; if(!P.hinted){P.hinted=true; P.hints++}}
+  else if(act==='sol'){ if(a.dataset.sure){var s2=P.seq.steps[P.i]; P.ed.set(s2.sol); P.peeked=true; P.lessonPeek++; a.hidden=true; $('#fb').innerHTML='<div class="banner ok"><b>Here is one way to do it.</b>Read it, then press Check my code to finish this step. You get fewer XP when you peek, and that is fine.</div>'} else {a.dataset.sure=1; a.textContent='Really show it?'} }
+  else if(act==='onboard'){ store.name=($('#obName').value||'').trim(); store.goal=+$('#obGoal').value; store.onboarded=true; save(); viewHome(); updateHeader(); toast('All set. Your daily goal is '+store.goal+' minutes.') }
+  else if(act==='saveset'){ store.name=($('#setName').value||'').trim(); store.goal=+$('#setGoal').value; store.onboarded=true; save(); toast('Saved.'); viewProfile(); updateHeader() }
+  else if(act==='copybk'){ var tx=$('#bk'); try{navigator.clipboard.writeText(tx.value).then(function(){toast('Copied.')},function(){tx.select(); toast('Press Ctrl+C to copy.')})}catch(x){tx.select(); toast('Press Ctrl+C to copy.')} }
+  else if(act==='impbk'){ try{var o2=JSON.parse($('#bk').value); if(!o2||o2.v!==1||typeof o2.xp!=='number')throw 0; var f=fresh(); for(var k in f) if(!(k in o2)) o2[k]=f[k]; store=o2; save(); toast('Imported.'); viewProfile(); updateHeader()}catch(x){toast('That text is not a valid backup.')} }
+  else if(act==='reset1'){ if(a.dataset.sure){store=fresh(); save(); toast('Progress reset.'); go('home'); updateHeader()} else {a.dataset.sure=1; a.textContent='Click again to erase everything'} }
+});
+var themeBtn=$('#themeBtn');
+function themeLabel(){var cur=document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); themeBtn.textContent=cur==='dark'?'Light':'Dark'}
+themeBtn.addEventListener('click',function(){var r=document.documentElement, cur=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); r.setAttribute('data-theme',cur==='dark'?'light':'dark'); themeLabel()});
+themeLabel();
+
+/* ---------- self-test (used while building: runs every exercise solution) ---------- */
+window.__selftest=async function(){
+  var bad=[], n=0;
+  var steps=[]; PC.courses.forEach(function(c){c.lessons.forEach(function(l,li){l.steps.forEach(function(s,si){steps.push([c.id+':'+(li+1)+':'+(si+1),s])})})});
+  PC.daily.forEach(function(s,i){steps.push(['daily:'+i,s])});
+  for(var i=0;i<steps.length;i++){var id=steps[i][0], s=steps[i][1];
+    if(s.k==='learn'){ var r=await execHeadless(s.code||'',['Sam','3','4','5','6']); if(r.err&&!s.mayFail)bad.push(id+' LEARN demo error: '+String(r.err)); n++ }
+    else if(s.k==='code'){ n++;
+      if(typeof s.sol!=='string'){bad.push(id+' missing solution'); continue}
+      var ok=await runChecks(s,s.sol); if(!ok.ok){var f=ok.res.filter(function(x){return !x.ok})[0]; bad.push(id+' SOLUTION FAILS: '+(f.err?String(f.err.type+': '+f.err.msg+' line '+f.err.line):f.msg||('want '+JSON.stringify(f.t.o)+' got '+JSON.stringify(f.got))))}
+      var st=await runChecks(s,s.starter); if(st.ok&&!s.allowStarterPass)bad.push(id+' STARTER ALREADY PASSES')
+    } else if(s.k==='quiz'){ n++; if(!(s.ans>=0&&s.ans<s.opts.length))bad.push(id+' bad quiz index') }
+  }
+  PC.warm.forEach(function(q,i){ if(!(q.ans>=0&&q.ans<q.opts.length))bad.push('warm:'+i+' bad index') });
+  return {checked:n,problems:bad};
+};
+
+/* ---------- start ---------- */
+try{ if(!location.hash)history.replaceState(null,'','#home') }catch(e){}
+checkBadges(); route();
+})();
+</script>
