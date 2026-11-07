@@ -2,7 +2,7 @@
 
 Learn the basics of Python in 10 minutes a day. **Ten Minute Python** is a free, Codecademy-style web course for complete beginners. You read a short idea, type a little code, and run it right in your browser. No installs, no sign-up.
 
-**Try it live:** https://ullrich-off.github.io/ten-minute-python/ *(replace with your own link after you turn on GitHub Pages)*
+**Try it live:** [https://ullrich-off.github.io/Python-Basics-Course-for-FREE/](https://ullrich-off.github.io/Python-Basics-Course-for-FREE/)
 
 ## What you get
 - **10 courses, 38 lessons, about 160 small steps**, from your first `print()` to a final exam:
